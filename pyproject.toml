@@ -40,6 +40,10 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.flake8-bugbear]
+# Typer / FastAPI idiomatically use these as default arguments.
+extend-immutable-calls = ["typer.Argument", "typer.Option", "fastapi.Depends", "fastapi.Query"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
