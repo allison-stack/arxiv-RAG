@@ -26,5 +26,7 @@ def extract_pages(pdf_path: Path) -> list[str]:
     with pymupdf.open(pdf_path) as doc:
         return [page.get_text() for page in doc]
     
-path = download_paper("2406.09843")
-print(extract_text(path)[:500])
+def save_text(arxiv_id: str, text: str) -> Path:
+    file_path = RAW_DIR / f"{arxiv_id}.txt"
+    file_path.write_text(text)
+    return file_path
