@@ -1,23 +1,20 @@
 import httpx
 from pathlib import Path
 import pymupdf
-from arxiv_rag.chunk import recursive_text_splitter
+from arxiv_rag.chunk import Chunk, recursive_text_splitter
 
 RAW_DIR = Path("data/raw")
 
-@dataclass
-class Chunk:
-    id: str
-    paper_id: str
-    page: int
-    text: str
-
-def chunk_paper(doc, paper_id: str) -> list[Chunk]:
+def chunk_paper(pdf_path: Path, paper_id: str) -> list[Chunk]:
     chunks = []
-    for page_num, page in enumerate(doc):
-        for i, text in enumerate(recursive_text_splitter(page.get_text())):
-            chunks.append(Chunk(id=f"{paper_id}-p{page_num}-c{i}", paper_id=paper_id, page=page_num, text=text))
-    return chunks
+    count = 0
+    with pymupdf.open(pdf_path) as doc:
+        for page_num, page in enumerate(doc, start=1):
+            page_text = page.get_text()
+            for piece in recursive_text_splitter(page_text):
+                chunks.append(Chunk(id=f"{paper_id}-p{count:04d}", paper_id=paper_id, page=page_num, text=piece))
+                count += 1
+        return chunks
 
 def download_paper(arxiv_id: str) -> Path:
     RAW_DIR.mkdir(parents=True, exist_ok=True)
